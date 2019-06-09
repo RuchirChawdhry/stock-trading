@@ -215,10 +215,10 @@ def buy_stock():
             '''UPDATE users SET bankAccount = ? WHERE username = ?''',
             (new_balance, login.current_user[0]))
     # cursor.execute(update_bank_balance, [(login.current_user[0])])
-    print(new_balance)
-    # print(new_balance)
+    print('''
+          Your order was successfully executed. Your bank balance is: ''' +
+          new_balance)
     # //TODO: Add import to database for buy_stock (UserID, stock_symbol, time_stamp, number_shares)
-    # //TODO: Immediately deduct the INR from bank account the moment the user buys a stock.
 
 
 def sell_stock():
