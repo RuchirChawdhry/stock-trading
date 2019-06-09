@@ -6,6 +6,8 @@ import pyfiglet
 import pandas as pd
 from urllib.request import urlopen
 from create_db import *
+import requests
+from datetime import datetime
 
 THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
 os.chdir(THIS_FOLDER)
@@ -99,16 +101,16 @@ def main_menu():
 
 
 def loggedin_menu():
+    os.system("clear")
+    loggedin_heading = pyfiglet.figlet_format("Welcome", font="starwars")
+    print(loggedin_heading)
+    loggedin_subheading = pyfiglet.figlet_format(str(login.current_user[0]),
+                                                 font="bubble")
+    print(loggedin_subheading)
+
     while True:
         try:
-            os.system("clear")
-            loggedin_heading = pyfiglet.figlet_format("Welcome",
-                                                      font="starwars")
-            loggedin_subheading = pyfiglet.figlet_format(str(
-                login.current_user[0]),
-                                                         font="bubble")
-            print(loggedin_heading)
-            print(loggedin_subheading)
+
             print('''
                   [1] --- >> Search by Company Name or Symbol
                   [2] --- >> Get Latest Stock Quote
@@ -131,56 +133,11 @@ def loggedin_menu():
             if choice in menu_funcs_loggedin:
                 menu_funcs_loggedin[choice]()  #calls the function
 
+            else:
+                print("Command not recognized. ")
+
         except ValueError:
             print("Please enter a number. ")
-
-
-def menu():
-    initial = True
-    loggedin = True
-    while initial == True:
-        initial_menu()
-        choice = input("Enter Menu Number:")
-        # choice = int(choice)
-        # map the options to functions
-        menu_funcs = {'1': login, '2': register, '3': company_search}
-        # menu()
-        # if choice == 'q':
-        #     return # exit
-
-        if choice in menu_funcs:
-            menu_funcs[choice]()  # call the function
-        if choice == '1':
-            initial == False
-
-            while loggedin == True:
-                loggedin == True
-                loggedin_menu()
-
-                choice_ = input("Enter Menu Number:  ")
-                menu_funcs_loggedin = {
-                    '1': company_search,
-                    '2': get_quote,
-                    '3': view_portfolio,
-                    '4': buy_stock,
-                    '5': sell_stock,
-                    '6': logout
-                }
-                if choice_ in menu_funcs_loggedin:
-                    menu_funcs_loggedin[choice_]()
-                if choice_ == '6':
-                    loggedin == False
-                    initial == True
-                    break
-                else:
-                    print(
-                        "That is not a valid choice. You can only choose from the menu."
-                    )
-
-        else:
-            print(
-                "That is not a valid choice. You can only choose from the menu."
-            )
 
 
 def company_search():
@@ -194,10 +151,36 @@ def company_search():
 
 
 def get_quote():
+    pd.set_option('display.width', 200)
     search_quote = input("Enter stock symbol: ")
-    url = 'http://dev.markitondemand.com/MODApis/Api/v2/Quote/json?symbol=' + search_quote
-    df = pd.DataFrame([requests.get(url).json()])
-    display(df)
+    try:
+        url = 'http://dev.markitondemand.com/MODApis/Api/v2/Quote/json?symbol=' + search_quote
+        df = pd.DataFrame([requests.get(url).json()])
+        print("\n")
+        dropped_columns = ["MSDate", "Status", "Timestamp"]
+        # pd.set_option('expand_frame_repr', False)
+        df1 = df.drop(dropped_columns, axis="columns")
+        # display(df)
+        df1 = df.drop(dropped_columns, axis="columns")
+        df2 = df1
+        df1 = df1.reindex(
+            ['Symbol', 'Name', 'Open', 'LastPrice', 'Change', 'ChangePercent'],
+            axis=1)
+        df2 = df2.reindex([
+            'Symbol', 'Low', 'High', 'MarketCap', 'ChangePercentYTD',
+            'ChangeYTD'
+        ],
+                          axis=1)
+
+        print("Quote for " + search_quote.upper() + " as of " +
+              datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " UTC:")
+        print(df1)
+        print("\n")
+        print(df2)
+    except:
+        print("Server not responding. Try again later. ")
+        time.sleep(1)
+        pass
 
 
 def leaderboard():
