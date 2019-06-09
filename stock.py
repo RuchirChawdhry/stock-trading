@@ -12,6 +12,8 @@ from datetime import datetime
 THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
 os.chdir(THIS_FOLDER)
 
+# con = sqlite3.connect("data.db")
+
 
 def login():
     while True:
@@ -158,9 +160,7 @@ def get_quote():
         df = pd.DataFrame([requests.get(url).json()])
         print("\n")
         dropped_columns = ["MSDate", "Status", "Timestamp"]
-        # pd.set_option('expand_frame_repr', False)
         df1 = df.drop(dropped_columns, axis="columns")
-        # display(df)
         df1 = df.drop(dropped_columns, axis="columns")
         df2 = df1
         df1 = df1.reindex(
@@ -196,6 +196,27 @@ def buy_stock():
         buy_quote)
     obj = json.load(url)
     stock_price = obj["LastPrice"]
+    amount_deducted = float(stock_price) * float(num_shares)
+    # bank_balance = pd.read_sql(
+    #     "SELECT bankAccount FROM users WHERE username=login.current_user")
+    with sqlite3.connect('data.db') as db:
+        cursor = db.cursor()
+    find_bank_balance = ("SELECT bankAccount from users WHERE username = ?")
+    cursor.execute(find_bank_balance, [(login.current_user[0])])
+    results = list(cursor)
+    results_list = [x[0] for x in results]
+    # print(results_list
+    new_balance = float(results_list[0]) - float(amount_deducted)
+    with sqlite3.connect('data.db') as db:
+        cursor = db.cursor()
+        update_bank_balance = (
+            "UPDATE users SET bankAccount WHERE username = ?")
+        cursor.execute(
+            '''UPDATE users SET bankAccount = ? WHERE username = ?''',
+            (new_balance, login.current_user[0]))
+    # cursor.execute(update_bank_balance, [(login.current_user[0])])
+    print(new_balance)
+    # print(new_balance)
     # //TODO: Add import to database for buy_stock (UserID, stock_symbol, time_stamp, number_shares)
     # //TODO: Immediately deduct the INR from bank account the moment the user buys a stock.
 
@@ -214,6 +235,7 @@ def sell_stock():
 
 
 def view_portfolio():
+    #//TO: Use pandas to easily display portfolio
     pass
 
 
