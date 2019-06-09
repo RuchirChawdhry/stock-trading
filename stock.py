@@ -12,7 +12,7 @@ os.chdir(THIS_FOLDER)
 
 def login():
     while True:
-        current_user = []
+        current_user = ""
         username = input("Enter Username:")
         password = input("Enter Password:")
         with sqlite3.connect('data.db') as db:
@@ -22,20 +22,18 @@ def login():
         results = cursor.fetchall()
 
         if results:
-            for i in results:
-                print("Welcome, " + i[1] + "!\n")
-            login.current_user = list(results[0])
-            return current_user
-            # return ("exit")
+            print("Welcome, " + username + "!\n")
+            login.current_user = [username]
+            loggedin_state = True
+            if loggedin_state:
+                return loggedin_menu()
 
         else:
-            print("Username and/or password not found. ")
-            again = input("Do you want to try again? (y/n): ")
-            if again.lower() == "n":
-                print("Goodbye")
-                time.sleep(1)
-                # return("exit")
-                break
+            print(
+                "Username and/or password not found. Taking you back to the main menu."
+            )
+            time.sleep(1)
+            return main_menu()
 
 
 def register():
@@ -68,36 +66,68 @@ def heading():
     heading_ = pyfiglet.figlet_format("Welcome Stock Trader!", font="starwars")
     print(heading_ + '\n')
     sub_heading = pyfiglet.figlet_format("Select option:", font="bubble")
+    loggedin_heading = pyfiglet.figlet_format("Welcome!", font="starwars")
+
     print(heading)
     print(sub_heading)
 
 
-def initial_menu():
-    # while True:
-    option_1 = "[1] --- > Login"
-    option_2 = "[2] --- > Register"
-    option_3 = "[3] --- > Search by Company Name or Symbol (w/o Logging-in)"
-    # //TODO: If users logs out as remove all elements in the current_user list.
-    print(option_1)
-    print(option_2)
-    print(option_3)
-    print("\n")
+# //TODO: If users logs out as remove all elements in the current_user list.
+
+
+def main_menu():
+    while True:
+        try:
+
+            print('''
+                 [1] --- > Login
+                 [2] --- > Register
+                 [3] --- > Search by Company Name or Symbol (w/o Logging-in)'''
+                  )
+
+            answer = int(input("[Enter]: "))
+
+            if answer == 1:
+                login()
+            elif answer == 2:
+                register()
+            elif answer == 3:
+                company_search()
+
+            else:
+                print("Command not recognized. ")
+
+        except ValueError:
+            print("Please enter a number. ")
 
 
 def loggedin_menu():
-    option_login_1 = "[1] --- >> Search by Company Name or Symbol"
-    option_login_2 = "[2] --- >> Get Latest Stock Quote"
-    option_login_3 = "[3] --- >> View Your Portfolio"
-    option_login_4 = "[4] --- >> Buy Stocks"
-    option_login_5 = "[5] --- >> Sell Stocks"
-    option_login_6 = "[6] --- >> Logout as: " + str(login.current_user)
-    print(option_login_1)
-    print(option_login_2)
-    print(option_login_3)
-    print(option_login_4)
-    print(option_login_5)
-    print(option_login_6)
-    print("\n")
+    while True:
+        try:
+            os.system("clear")
+            print(heading.loggedin_heading)
+            print('''
+                  [1] --- >> Search by Company Name or Symbol
+                  [2] --- >> Get Latest Stock Quote
+                  [3] --- >> View Your Portfolio
+                  [4] --- >> Buy Stocks
+                  [5] --- >> Sell Stocks
+                  [6] --- >> Logout as: ''' + str(login.current_user))
+
+            choice = int(input("[Enter]: "))
+            menu_funcs_loggedin = {
+                1: company_search,
+                2: get_quote,
+                3: view_portfolio,
+                4: buy_stock,
+                5: sell_stock,
+                6: logout
+            }
+            if choice in menu_funcs_loggedin:
+                menu_funcs_loggedin[choice]()
+
+        except ValueError:
+            print("Please enter a number. ")
 
 
 def menu():
@@ -201,9 +231,10 @@ def view_portfolio():
 
 def logout():
     # del login.current_user
-    login.current_user.clear()
+    # login.current_user.clear()
+    pass
 
 
 if __name__ == "__main__":
     heading()
-    menu()
+    main_menu()
