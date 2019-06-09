@@ -22,7 +22,8 @@ with sqlite3.connect("data.db") as db:
                    orderTime DATETIME NOT NULL,
                    price NOT NULL,
                    numShares NOT NULL,
-                   bankAccount DEFAULT 100000);''') # OrderType is either b (buy) or s (sell)
-                                                    # OrderUserID is the User ID who placed
-                                                    # the order
+                   bankAccount DEFAULT 100000);'''
+              )  # OrderType is either b (buy) or s (sell)
+    # OrderUserID is the User ID who placed
+    # the order
 db.commit()
