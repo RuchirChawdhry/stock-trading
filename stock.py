@@ -5,6 +5,7 @@ import json
 import pyfiglet
 import pandas as pd
 from urllib.request import urlopen
+from create_db import *
 
 THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
 os.chdir(THIS_FOLDER)
@@ -13,8 +14,8 @@ os.chdir(THIS_FOLDER)
 def login():
     while True:
         current_user = ""
-        username = input("Enter Username:")
-        password = input("Enter Password:")
+        username = input("Enter Username: ")
+        password = input("Enter Password: ")
         with sqlite3.connect('data.db') as db:
             cursor = db.cursor()
         find_user = ("SELECT * from users WHERE username = ? AND password = ?")
@@ -63,12 +64,9 @@ def register():
 
 
 def heading():
-    heading_ = pyfiglet.figlet_format("Welcome Stock Trader!", font="starwars")
-    print(heading_ + '\n')
+    heading = pyfiglet.figlet_format("Welcome Stock Trader!", font="starwars")
+    print(heading + '\n')
     sub_heading = pyfiglet.figlet_format("Select option:", font="bubble")
-    loggedin_heading = pyfiglet.figlet_format("Welcome!", font="starwars")
-
-    print(heading)
     print(sub_heading)
 
 
@@ -80,10 +78,9 @@ def main_menu():
         try:
 
             print('''
-                 [1] --- > Login
-                 [2] --- > Register
-                 [3] --- > Search by Company Name or Symbol (w/o Logging-in)'''
-                  )
+                 [1] -- > Login
+                 [2] -- > Register
+                 [3] -- > Search by Company Name or Symbol (w/o Logging-in)''')
 
             answer = int(input("[Enter]: "))
 
@@ -105,16 +102,24 @@ def loggedin_menu():
     while True:
         try:
             os.system("clear")
-            print(heading.loggedin_heading)
+            loggedin_heading = pyfiglet.figlet_format("Welcome",
+                                                      font="starwars")
+            loggedin_subheading = pyfiglet.figlet_format(str(
+                login.current_user[0]),
+                                                         font="bubble")
+            print(loggedin_heading)
+            print(loggedin_subheading)
             print('''
                   [1] --- >> Search by Company Name or Symbol
                   [2] --- >> Get Latest Stock Quote
                   [3] --- >> View Your Portfolio
                   [4] --- >> Buy Stocks
                   [5] --- >> Sell Stocks
-                  [6] --- >> Logout as: ''' + str(login.current_user))
+                  [6] --- >> Logout as: ''' + str(login.current_user[0]))
 
             choice = int(input("[Enter]: "))
+
+            #maps the options to their respective function
             menu_funcs_loggedin = {
                 1: company_search,
                 2: get_quote,
@@ -124,7 +129,7 @@ def loggedin_menu():
                 6: logout
             }
             if choice in menu_funcs_loggedin:
-                menu_funcs_loggedin[choice]()
+                menu_funcs_loggedin[choice]()  #calls the function
 
         except ValueError:
             print("Please enter a number. ")
@@ -236,5 +241,7 @@ def logout():
 
 
 if __name__ == "__main__":
+    create_tables()
+    seed_users()
     heading()
     main_menu()
