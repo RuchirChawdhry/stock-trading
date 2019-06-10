@@ -191,33 +191,34 @@ def buy_stock():
     buy_quote = input("Enter exact stock symbol you want to buy: ")
     num_shares = input("Number of shares you want to buy of " +
                        buy_quote.upper() + "? ")
+    buy_stock.buy_quote = buy_quote
+    buy_stock.num_shares = num_shares
     url = urlopen(
         'http://dev.markitondemand.com/MODApis/Api/v2/Quote/json?symbol=' +
         buy_quote)
     obj = json.load(url)
     stock_price = obj["LastPrice"]
+    buy_stock.stock_price = stock_price
     amount_deducted = float(stock_price) * float(num_shares)
-    # bank_balance = pd.read_sql(
-    #     "SELECT bankAccount FROM users WHERE username=login.current_user")
+
     with sqlite3.connect('data.db') as db:
         cursor = db.cursor()
     find_bank_balance = ("SELECT bankAccount from users WHERE username = ?")
     cursor.execute(find_bank_balance, [(login.current_user[0])])
     results = list(cursor)
     results_list = [x[0] for x in results]
-    # print(results_list
+
     new_balance = float(results_list[0]) - float(amount_deducted)
     with sqlite3.connect('data.db') as db:
         cursor = db.cursor()
-        update_bank_balance = (
-            "UPDATE users SET bankAccount WHERE username = ?")
+        # update_bank_balance = (
+        #     "UPDATE users SET bankAccount WHERE username = ?")
         cursor.execute(
             '''UPDATE users SET bankAccount = ? WHERE username = ?''',
             (new_balance, login.current_user[0]))
-    # cursor.execute(update_bank_balance, [(login.current_user[0])])
     print('''
           Your order was successfully executed. Your bank balance is: ''' +
-          new_balance)
+          str(new_balance))
     # //TODO: Add import to database for buy_stock (UserID, stock_symbol, time_stamp, number_shares)
 
 
@@ -234,9 +235,35 @@ def sell_stock():
     # //TODO: Add import to database for sell_stock (UserID, stock_symbol, time_stamp, number_shares)
 
 
+def stock_table_update():
+    # df.to_sql("librarian", conn, if_exists="append", index=True)
+
+    data = [
+        login.current_user[0], buy_stock.buy_quote, buy_stock.stock_price,
+        buy_stock.num_shares
+    ]
+    df = pd.DataFrame(
+        [data], columns=["username", "stockSymbol", "price", "numShares"])
+
+    # df = pd.DataFrame([[username]])
+    print(data)
+    # with sqlite3.connect("data.db") as db:
+    #     c = db.cursor()
+    #
+    #     c.execute('''UPDATE stocks SET stockSymbol = ? WHERE username = ?''',
+    #               (buy_stock.buy_quote, login.current_user[0]))
+
+
 def view_portfolio():
     #//TO: Use pandas to easily display portfolio
-    pass
+    data = [
+        login.current_user, buy_stock.buy_quote, buy_stock.stock_price,
+        buy_stock.num_shares
+    ]
+    df = pd.DataFrame(
+        [data], columns=["username", "stockSymbol", "price", "numShares"])
+
+    print(data)
 
 
 def logout():

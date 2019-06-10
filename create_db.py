@@ -19,16 +19,16 @@ def create_tables():  # Creating sqlite database with tables: users, stocks
         c.execute('''
                        CREATE TABLE IF NOT EXISTS stocks
                        (orderID INTEGER PRIMARY KEY AUTOINCREMENT,
-                       orderUserID INTEGER NOT NULL,
+                       username NOT NULL,
                        stockSymbol NOT NULL,
                        orderType NOT NULL,
                        orderTime DATETIME NOT NULL,
                        price NOT NULL,
-                       numShares NOT NULL,
-                       bankAccount DEFAULT 100000);'''
+                       numShares NOT NULL);'''
                   )  # OrderType is either b (buy) or s (sell)
         # OrderUserID is the User ID who placed
         # the order
+
     db.commit()
 
 
@@ -41,3 +41,11 @@ def seed_users():
         df.to_sql("users", db, if_exists="append", index=False)
     except:
         pass
+
+
+# def stock_table_update():
+#     with sqlite3.connect("data.db") as db:
+#         c = db.cursor()
+#
+#
+#         cursor.execute('''UPDATE stocks SET stockSymbol WHERE username = ?''')
